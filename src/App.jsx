@@ -1,39 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Controls } from './controls';
+import { MediaStreamContext } from './media-stream-provider';
+import { useMediaDevices } from './use-media-devices';
 
-function App() {
-  // Create the count state.
-  const [count, setCount] = useState(0);
-  // Create the counter (+1 every second).
-  useEffect(() => {
-    const timer = setTimeout(() => setCount(count + 1), 1000);
-    return () => clearTimeout(timer);
-  }, [count, setCount]);
-  // Return the App component.
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.jsx</code> and save to reload.
-        </p>
-        <p>
-          Page has been open for <code>{count}</code> seconds.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </p>
-      </header>
-    </div>
-  );
-}
+export const App = () => {
+	useMediaDevices();
 
-export default App;
+	const stream = useContext(MediaStreamContext);
+	const [started, setStarted] = useState(Boolean(stream));
+	const videoReference = useRef();
+
+	// useEffect(() => {
+	// 	function handleConnection(event) {
+	// 		const peerConnection = event.target;
+
+	// 		if (event.candidate) {
+	// 			const newIceCandidate = new RTCIceCandidate(iceCandidate);
+	// 			const otherPeer = getOtherPeer(peerConnection);
+
+	// 			otherPeer
+	// 				.addIceCandidate(newIceCandidate)
+	// 				.then(() => {
+	// 					handleConnectionSuccess(peerConnection);
+	// 				})
+	// 				.catch((error) => {
+	// 					handleConnectionFailure(peerConnection, error);
+	// 				});
+
+	// 			trace(
+	// 				`${getPeerName(peerConnection)} ICE candidate:\n` +
+	// 					`${event.candidate.candidate}.`,
+	// 			);
+	// 		}
+	// 	}
+
+	// 	const rtcConfiguration = {
+	// 		iceServers: ['stun.l.google.com:19302'],
+	// 	};
+	// 	const localPeerConnection = new RTCPeerConnection(rtcConfiguration);
+	// 	localPeerConnection.addEventListener('icecandidate', handleConnection);
+	// 	localPeerConnection.addEventListener(
+	// 		'iceconnectionstatechange',
+	// 		handleConnectionChange,
+	// 	);
+	// }, [started]);
+
+	useEffect(() => {
+		let video = videoReference.current;
+		const onLoadedMetaData = () => {
+			video.play();
+		};
+		if (stream) {
+			video.addEventListener('loadedmetadata', onLoadedMetaData);
+			video.srcObject = stream;
+		}
+
+		return () => {
+			video.removeEventListener('loadedmetadata', onLoadedMetaData);
+		};
+	}, [stream]);
+
+	return (
+		<>
+			<Controls />
+			{/* <button disabled={!stream}>join!</button> */}
+			{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+			<video
+				style={{ backgroundColor: 'black' }}
+				width="600"
+				height="300"
+				ref={videoReference}
+			/>
+		</>
+	);
+};

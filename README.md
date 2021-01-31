@@ -1,3 +1,4 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/32ef01a2-570f-4122-b727-4d8303868bbb/deploy-status)](https://app.netlify.com/sites/media-devices/deploys)
 # New Project
 
 > ✨ Bootstrapped with Create Snowpack App (CSA).
